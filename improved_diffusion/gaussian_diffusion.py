@@ -463,6 +463,7 @@ class GaussianDiffusion:
             img = noise
         else:
             img = th.randn(*shape, device=device)
+        #对时间进行倒叙索引
         indices = list(range(self.num_timesteps))[::-1]
 
         if progress:
@@ -647,7 +648,7 @@ class GaussianDiffusion:
                 )
                 yield out
                 img = out["sample"]
-
+    #vb变分下限
     def _vb_terms_bpd(
         self, model, x_start, x_t, t, clip_denoised=True, model_kwargs=None
     ):
@@ -661,9 +662,11 @@ class GaussianDiffusion:
                  - 'output': a shape [N] tensor of NLLs or KLs.
                  - 'pred_xstart': the x_0 predictions.
         """
+        #真实的x0 xt 去计算xt-1的均值和方差
         true_mean, _, true_log_variance_clipped = self.q_posterior_mean_variance(
             x_start=x_start, x_t=x_t, t=t
         )
+        #xt  t和预测的x0 去计算xt-1的均值和方差
         out = self.p_mean_variance(
             model, x_t, t, clip_denoised=clip_denoised, model_kwargs=model_kwargs
         )
